@@ -25,38 +25,40 @@ const COLORS = {
   white: '#FFFFFF',
 };
 
+const CLIENT_SHOWREEL = "./2bo Assets/WhatsApp Video 2026-04-26 at 11.34.17 PM.mp4";
+
 const SECTIONS = [
   {
     id: "01",
     label: "FOR ARTISTS",
     title: "VISUAL SHOW DESIGN & CREATIVE ART DIRECTION",
     desc: "From the idea to the final production, we always seek a perfect integration between art and technique.",
-    type: "image",
-    asset: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=2000",
+    type: "video",
+    asset: CLIENT_SHOWREEL,
   },
   {
     id: "02",
     label: "FOR FESTIVALS",
     title: "STAGE DESIGN & TECHNICAL PRODUCTION",
     desc: "We meet the highest technical standards, respect deadlines and ensure agile development in complex environments.",
-    type: "video_fallback", // Simulated with high-res image for stability
-    asset: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=2000",
+    type: "video",
+    asset: CLIENT_SHOWREEL,
   },
   {
     id: "03",
     label: "FOR BRANDS",
     title: "IMMERSIVE EXPERIENCES & BRAND ACTIVATIONS",
     desc: "We build bridges between brands and their audiences through unforgettable sensory experiences.",
-    type: "image",
-    asset: "https://images.unsplash.com/photo-1514525253361-bee8a187499b?auto=format&fit=crop&q=80&w=2000",
+    type: "video",
+    asset: CLIENT_SHOWREEL,
   },
   {
     id: "04",
     label: "FOR SPACES",
     title: "PERMANENT INSTALLATIONS & ARCHITAINMENT",
     desc: "Transforming physical environments into dynamic living canvases that breathe and respond.",
-    type: "image",
-    asset: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?auto=format&fit=crop&q=80&w=2000",
+    type: "video",
+    asset: CLIENT_SHOWREEL,
   }
 ];
 
@@ -78,10 +80,15 @@ const Section = ({ data, total }) => {
         animate={isInView ? { scale: 1 } : { scale: 1.1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
       >
-        <img 
-          src={data.asset} 
-          alt={data.label} 
+        <video
+          src={data.asset}
           className="w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={`${data.label} client showreel background`}
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
@@ -200,7 +207,7 @@ const Navbar = () => {
                 <Twitter className="text-white/40 hover:text-magenta cursor-pointer" />
                 <Mail className="text-white/40 hover:text-magenta cursor-pointer" />
               </div>
-              <p className="text-[10px] font-mono text-white/20 tracking-widest">© 2024 TOBEORGANISED GROUP</p>
+              <p className="text-[10px] font-mono text-white/20 tracking-widest">© 2026 TOBEORGANISED GROUP</p>
             </div>
           </motion.div>
         )}
@@ -296,7 +303,7 @@ export default function App() {
               Project Inquiry
             </button>
             <button className="border border-white/20 text-white font-black uppercase px-12 py-6 text-sm tracking-widest hover:border-magenta hover:text-magenta transition-colors">
-              Showreel 2024
+              Showreel 2026
             </button>
           </div>
           
