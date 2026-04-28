@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   AnimatePresence,
   motion,
   useInView
 } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ChevronDown,
   Instagram,
@@ -125,6 +127,135 @@ const MediaImage = ({ src, alt, className = '', delay = 0 }) => (
   />
 );
 
+const ProductionStripPage = ({ page, total }) => {
+  const sectionRef = useRef(null);
+  const imageColumnRef = useRef(null);
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    const imageColumn = imageColumnRef.current;
+    const scroller = section?.closest('main');
+
+    if (!section || !imageColumn || !scroller) return undefined;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.set(imageColumn, { y: '14vh' });
+
+      gsap.to(imageColumn, {
+        y: () => {
+          const visibleWindow = Math.min(scroller.clientHeight * 0.72, 720);
+          const travel = Math.max(imageColumn.scrollHeight - visibleWindow, 360);
+          return -travel;
+        },
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          scroller,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.85,
+          invalidateOnRefresh: true,
+        },
+      });
+    }, section);
+
+    ScrollTrigger.refresh();
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      id={page.id}
+      ref={sectionRef}
+      className="relative min-h-[230vh] w-full snap-start bg-black px-5 pb-16 pt-28 text-white md:px-10 lg:min-h-[285vh] lg:px-16"
+    >
+      <div className="sticky top-0 min-h-screen overflow-hidden pt-28 lg:pt-0">
+        <div className="absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-black via-black/70 to-transparent" />
+        <div className="pointer-events-none absolute right-[12%] top-[39%] hidden h-10 w-10 rounded-full border border-magenta/90 md:block">
+          <span className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-magenta shadow-[0_0_16px_#ff00ff]" />
+        </div>
+
+        <div className="relative z-10 mx-auto grid max-w-[1680px] gap-8 lg:min-h-screen lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-16">
+          <motion.div
+            initial={{ opacity: 0, x: -42 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ duration: 0.85, ease: 'easeOut' }}
+            className="max-w-[46rem] self-start lg:self-center lg:-mt-8"
+          >
+            <div className="mb-8 flex items-center gap-4 font-mono text-xs uppercase tracking-[0.34em] text-magenta">
+              <span>{page.eyebrow}</span>
+              <span className="h-px w-16 bg-magenta/80" />
+              <span className="text-white/35">{total.split('/').pop()?.trim()}</span>
+            </div>
+
+            <h2 className="text-[clamp(3.8rem,17vw,9.9rem)] font-black uppercase leading-[0.88] tracking-[-0.045em] text-white lg:text-[clamp(4.7rem,9.2vw,9.9rem)]">
+              From
+              <br />
+              Sketch
+              <br />
+              To Show
+              <br />
+              Call
+            </h2>
+
+            <p className="mt-7 max-w-[calc(100vw-2.5rem)] font-mono text-sm font-bold leading-7 text-white/76 md:max-w-[43rem] md:text-base lg:mt-10">
+              {page.desc}
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 44 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: false, amount: 0.35 }}
+            transition={{ duration: 0.85, delay: 0.08, ease: 'easeOut' }}
+            className="relative h-[46vh] min-h-[22rem] self-start overflow-hidden border-y border-white/14 lg:h-[72vh] lg:min-h-[42rem] lg:self-center lg:-mt-4"
+          >
+            <div
+              data-production-strip
+              ref={imageColumnRef}
+              className="grid gap-5 py-10 will-change-transform sm:grid-cols-2 lg:flex lg:flex-col lg:gap-7 lg:py-16"
+            >
+              {page.images.map((src, imageIndex) => {
+                const alignment =
+                  imageIndex % 3 === 0
+                    ? 'lg:self-start'
+                    : imageIndex % 3 === 1
+                      ? 'lg:self-center'
+                      : 'lg:self-end';
+
+                return (
+                  <div
+                    key={`${src}-${imageIndex}`}
+                    data-production-tile={imageIndex + 1}
+                    className={`group relative w-full overflow-hidden border border-white/14 bg-white/[0.03] shadow-[0_24px_70px_rgba(0,0,0,0.55)] lg:w-[min(36vw,620px)] ${alignment}`}
+                  >
+                    <MediaImage
+                      src={src}
+                      alt={`${page.id} production control stage frame ${imageIndex + 1}`}
+                      delay={imageIndex * 0.045}
+                      className="aspect-[1.85/1] transition duration-500 group-hover:scale-[1.035]"
+                    />
+                    <span className="absolute left-3 top-3 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                      {String(imageIndex + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const PageChrome = ({ page, total, children, align = 'left' }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.45 });
@@ -236,25 +367,7 @@ const UniquePage = ({ page, index, total }) => {
   }
 
   if (page.variant === 'strip') {
-    return (
-      <PageChrome page={page} total={total}>
-        <div className="relative py-8">
-          <div className="absolute left-0 top-0 h-px w-full bg-white/20" />
-          <div className="absolute bottom-0 left-0 h-px w-full bg-white/20" />
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-7">
-            {page.images.map((src, imageIndex) => (
-              <MediaImage
-                key={`${src}-${imageIndex}`}
-                src={src}
-                alt={`${page.id} production strip ${imageIndex + 1}`}
-                delay={imageIndex * 0.04}
-                className={`${imageIndex % 2 === 0 ? 'h-[52vh]' : 'h-[38vh] self-center'} border border-white/15`}
-              />
-            ))}
-          </div>
-        </div>
-      </PageChrome>
-    );
+    return <ProductionStripPage page={page} total={total} />;
   }
 
   if (page.variant === 'index') {
@@ -421,13 +534,51 @@ const CustomCursor = () => {
 
 export default function App() {
   const total = String(PAGES.length).padStart(2, '0');
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    const scrollToHash = (behavior = 'smooth') => {
+      const id = window.location.hash.slice(1);
+      if (!id || !mainRef.current) return;
+
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      requestAnimationFrame(() => {
+        const scrollTop =
+          target.getBoundingClientRect().top -
+          mainRef.current.getBoundingClientRect().top +
+          mainRef.current.scrollTop;
+
+        if (behavior === 'instant') {
+          mainRef.current.scrollTop = scrollTop;
+          return;
+        }
+
+        mainRef.current.scrollTo({
+          top: scrollTop,
+          behavior,
+        });
+      });
+    };
+
+    scrollToHash('instant');
+    const settleHashPosition = window.setTimeout(() => scrollToHash('instant'), 250);
+    const handleHashChange = () => scrollToHash('smooth');
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.clearTimeout(settleHashPosition);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black text-white selection:bg-magenta selection:text-black">
       <CustomCursor />
       <Navbar />
 
-      <main className="h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar">
+      <main ref={mainRef} className="h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar">
         <section id="home" className="relative flex h-screen w-full snap-start flex-col items-center justify-center overflow-hidden bg-black p-6 text-center">
           <motion.div
             className="absolute inset-0 z-0"
