@@ -129,42 +129,58 @@ const MediaImage = ({ src, alt, className = '', delay = 0 }) => (
 
 const ProductionStripPage = ({ page, total }) => {
   const sectionRef = useRef(null);
+  const imageWindowRef = useRef(null);
   const imageColumnRef = useRef(null);
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const section = sectionRef.current;
+    const imageWindow = imageWindowRef.current;
     const imageColumn = imageColumnRef.current;
     const scroller = section?.closest('main');
 
-    if (!section || !imageColumn || !scroller) return undefined;
+    if (!section || !imageWindow || !imageColumn || !scroller) return undefined;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return undefined;
 
     const ctx = gsap.context(() => {
-      gsap.set(imageColumn, { y: '14vh' });
+      const media = gsap.matchMedia();
 
-      gsap.to(imageColumn, {
-        y: () => {
-          const visibleWindow = Math.min(scroller.clientHeight * 0.72, 720);
-          const travel = Math.max(imageColumn.scrollHeight - visibleWindow, 360);
-          return -travel;
+      media.add(
+        {
+          desktop: '(min-width: 1024px)',
+          mobile: '(max-width: 1023px)',
         },
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          scroller,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.85,
-          invalidateOnRefresh: true,
-        },
-      });
+        (context) => {
+          const { desktop } = context.conditions;
+
+          gsap.set(imageColumn, { y: desktop ? '14vh' : '6vh' });
+
+          gsap.to(imageColumn, {
+            y: () => {
+              const extraBreathingRoom = desktop ? 140 : 54;
+              const travel = imageColumn.scrollHeight - imageWindow.clientHeight + extraBreathingRoom;
+              return -Math.max(travel, desktop ? 360 : 220);
+            },
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              scroller,
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: desktop ? 0.85 : 0.45,
+              invalidateOnRefresh: true,
+            },
+          });
+        }
+      );
+
+      ScrollTrigger.refresh();
+
+      return () => media.revert();
     }, section);
-
-    ScrollTrigger.refresh();
 
     return () => ctx.revert();
   }, []);
@@ -173,15 +189,15 @@ const ProductionStripPage = ({ page, total }) => {
     <section
       id={page.id}
       ref={sectionRef}
-      className="relative min-h-[230vh] w-full snap-start bg-black px-5 pb-16 pt-28 text-white md:px-10 lg:min-h-[285vh] lg:px-16"
+      className="relative min-h-[245vh] w-full snap-start bg-black px-5 pb-14 pt-24 text-white md:px-10 lg:min-h-[285vh] lg:px-16 lg:pt-28"
     >
-      <div className="sticky top-0 min-h-screen overflow-hidden pt-28 lg:pt-0">
+      <div className="sticky top-0 min-h-screen overflow-hidden pt-24 lg:pt-0">
         <div className="absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-black via-black/70 to-transparent" />
         <div className="pointer-events-none absolute right-[12%] top-[39%] hidden h-10 w-10 rounded-full border border-magenta/90 md:block">
           <span className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-magenta shadow-[0_0_16px_#ff00ff]" />
         </div>
 
-        <div className="relative z-10 mx-auto grid max-w-[1680px] gap-8 lg:min-h-screen lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-16">
+        <div className="relative z-10 mx-auto grid max-w-[1680px] gap-5 lg:min-h-screen lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-16">
           <motion.div
             initial={{ opacity: 0, x: -42 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -189,13 +205,13 @@ const ProductionStripPage = ({ page, total }) => {
             transition={{ duration: 0.85, ease: 'easeOut' }}
             className="max-w-[46rem] self-start lg:self-center lg:-mt-8"
           >
-            <div className="mb-8 flex items-center gap-4 font-mono text-xs uppercase tracking-[0.34em] text-magenta">
+            <div className="mb-5 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-magenta lg:mb-8 lg:text-xs lg:tracking-[0.34em]">
               <span>{page.eyebrow}</span>
               <span className="h-px w-16 bg-magenta/80" />
               <span className="text-white/35">{total.split('/').pop()?.trim()}</span>
             </div>
 
-            <h2 className="text-[clamp(3.8rem,17vw,9.9rem)] font-black uppercase leading-[0.88] tracking-[-0.045em] text-white lg:text-[clamp(4.7rem,9.2vw,9.9rem)]">
+            <h2 className="text-[clamp(2.95rem,12.5vw,4.6rem)] font-black uppercase leading-[0.86] tracking-[-0.045em] text-white lg:text-[clamp(4.7rem,9.2vw,9.9rem)] lg:leading-[0.88]">
               From
               <br />
               Sketch
@@ -205,7 +221,7 @@ const ProductionStripPage = ({ page, total }) => {
               Call
             </h2>
 
-            <p className="mt-7 max-w-[calc(100vw-2.5rem)] font-mono text-sm font-bold leading-7 text-white/76 md:max-w-[43rem] md:text-base lg:mt-10">
+            <p className="mt-5 max-w-[calc(100vw-2.5rem)] font-mono text-xs font-bold leading-5 text-white/76 md:max-w-[43rem] md:text-sm lg:mt-10 lg:text-base lg:leading-7">
               {page.desc}
             </p>
           </motion.div>
@@ -215,7 +231,8 @@ const ProductionStripPage = ({ page, total }) => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: false, amount: 0.35 }}
             transition={{ duration: 0.85, delay: 0.08, ease: 'easeOut' }}
-            className="relative h-[46vh] min-h-[22rem] self-start overflow-hidden border-y border-white/14 lg:h-[72vh] lg:min-h-[42rem] lg:self-center lg:-mt-4"
+            ref={imageWindowRef}
+            className="relative h-[31vh] min-h-[13.5rem] max-h-[16rem] self-start overflow-hidden border-y border-white/14 lg:h-[72vh] lg:min-h-[42rem] lg:max-h-none lg:self-center lg:-mt-4"
           >
             <div
               data-production-strip
@@ -264,29 +281,29 @@ const PageChrome = ({ page, total, children, align = 'left' }) => {
     <section
       id={page.id}
       ref={ref}
-      className="relative min-h-screen w-full overflow-hidden snap-start bg-black px-5 py-28 text-white md:px-10 lg:px-16"
+      className="relative min-h-screen w-full overflow-hidden snap-start bg-black px-5 py-24 text-white md:px-10 lg:h-screen lg:min-h-0 lg:px-16 lg:pb-10 lg:pt-28"
     >
       <div className="absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-black via-black/70 to-transparent" />
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-14rem)] max-w-[1560px] gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-12rem)] max-w-[1560px] gap-8 lg:h-full lg:min-h-0 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-12">
         <motion.div
           initial={{ opacity: 0, x: align === 'left' ? -40 : 40 }}
           animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: align === 'left' ? -40 : 40 }}
           transition={{ duration: 0.8 }}
-          className={`${align === 'left' ? 'lg:order-1' : 'lg:order-2'} max-w-3xl`}
+          className={`${align === 'left' ? 'lg:order-1' : 'lg:order-2'} max-w-3xl min-w-0`}
         >
-          <div className="mb-7 flex items-center gap-4 font-mono text-xs uppercase tracking-[0.28em] text-magenta">
+          <div className="mb-5 flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.28em] text-magenta lg:mb-6">
             <span>{page.eyebrow}</span>
             <span className="h-px w-14 bg-magenta/80" />
             <span className="text-white/35">{total}</span>
           </div>
-          <h2 className="max-w-4xl text-[clamp(2.7rem,8vw,8.5rem)] font-black uppercase leading-[0.82] tracking-normal text-white">
+          <h2 className="max-w-4xl text-[clamp(2.7rem,7.4vw,7.4rem)] font-black uppercase leading-[0.82] tracking-normal text-white lg:text-[clamp(4.1rem,6.15vw,7.05rem)]">
             {page.title}
           </h2>
-          <p className="mt-8 max-w-2xl font-mono text-sm leading-7 text-white/64 md:text-base">
+          <p className="mt-6 max-w-2xl font-mono text-sm leading-6 text-white/64 md:text-base lg:mt-7 lg:leading-7">
             {page.desc}
           </p>
         </motion.div>
-        <div className={`${align === 'left' ? 'lg:order-2' : 'lg:order-1'}`}>
+        <div className={`${align === 'left' ? 'lg:order-2' : 'lg:order-1'} min-h-0`}>
           {children}
         </div>
       </div>
@@ -300,7 +317,7 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'cinema') {
     return (
       <PageChrome page={page} total={total}>
-        <div className="relative min-h-[58vh] overflow-hidden border border-white/15">
+        <div className="relative h-[58vh] max-h-[40rem] min-h-[22rem] overflow-hidden border border-white/15 lg:h-[calc(100vh-15rem)] lg:min-h-0">
           <MediaImage src={main} alt={`${page.id} primary production frame`} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 grid grid-cols-3 gap-2 p-3 md:p-5">
@@ -322,11 +339,11 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'split') {
     return (
       <PageChrome page={page} total={total} align="right">
-        <div className="grid gap-4 md:grid-cols-[1.18fr_0.82fr]">
-          <MediaImage src={main} alt={`${page.id} large production frame`} className="min-h-[66vh] border border-white/15" />
-          <div className="grid gap-4">
-            <MediaImage src={second} alt={`${page.id} detail frame one`} className="h-[31vh] border border-white/15" delay={0.1} />
-            <MediaImage src={third} alt={`${page.id} detail frame two`} className="h-[31vh] border border-white/15" delay={0.18} />
+        <div className="grid h-[60vh] max-h-[40rem] min-h-[24rem] gap-4 md:grid-cols-[1.18fr_0.82fr] lg:h-[calc(100vh-16rem)] lg:min-h-0">
+          <MediaImage src={main} alt={`${page.id} large production frame`} className="h-full border border-white/15" />
+          <div className="grid min-h-0 gap-4">
+            <MediaImage src={second} alt={`${page.id} detail frame one`} className="min-h-0 border border-white/15" delay={0.1} />
+            <MediaImage src={third} alt={`${page.id} detail frame two`} className="min-h-0 border border-white/15" delay={0.18} />
           </div>
         </div>
       </PageChrome>
@@ -336,7 +353,7 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'mosaic') {
     return (
       <PageChrome page={page} total={total}>
-        <div className="grid min-h-[64vh] grid-cols-6 grid-rows-6 gap-3">
+        <div className="grid h-[60vh] max-h-[40rem] min-h-[24rem] grid-cols-6 grid-rows-6 gap-3 lg:h-[calc(100vh-16rem)] lg:min-h-0">
           <MediaImage src={main} alt={`${page.id} mosaic frame one`} className="col-span-6 row-span-3 border border-white/15 md:col-span-4 md:row-span-4" />
           <MediaImage src={second} alt={`${page.id} mosaic frame two`} className="col-span-3 row-span-2 border border-white/15 md:col-span-2 md:row-span-3" delay={0.08} />
           <MediaImage src={third} alt={`${page.id} mosaic frame three`} className="col-span-3 row-span-2 border border-white/15 md:col-span-2 md:row-span-3" delay={0.16} />
@@ -351,7 +368,7 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'poster') {
     return (
       <PageChrome page={page} total={total} align="right">
-        <div className="relative min-h-[68vh] overflow-hidden border border-magenta/45 bg-magenta/10">
+        <div className="relative h-[61vh] max-h-[41rem] min-h-[24rem] overflow-hidden border border-magenta/45 bg-magenta/10 lg:h-[calc(100vh-15.5rem)] lg:min-h-0">
           <MediaImage src={main} alt={`${page.id} architectural frame`} className="opacity-85" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.18),rgba(0,0,0,.75))]" />
           <div className="absolute inset-y-0 right-5 flex items-center">
