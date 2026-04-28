@@ -281,25 +281,25 @@ const PageChrome = ({ page, total, children, align = 'left' }) => {
     <section
       id={page.id}
       ref={ref}
-      className="relative min-h-screen w-full overflow-hidden snap-start bg-black px-5 py-24 text-white md:px-10 lg:h-screen lg:min-h-0 lg:px-16 lg:pb-10 lg:pt-28"
+      className="relative h-screen min-h-0 w-full overflow-hidden snap-start bg-black px-5 pb-5 pt-28 text-white [height:100dvh] md:px-10 md:pb-8 lg:px-16 lg:pb-10 lg:pt-28"
     >
       <div className="absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-black via-black/70 to-transparent" />
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-12rem)] max-w-[1560px] gap-8 lg:h-full lg:min-h-0 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-12">
+      <div className="relative z-10 mx-auto grid h-full min-h-0 max-w-[1560px] grid-rows-[auto_minmax(0,1fr)] gap-4 md:gap-6 lg:grid-rows-1 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-12">
         <motion.div
           initial={{ opacity: 0, x: align === 'left' ? -40 : 40 }}
           animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: align === 'left' ? -40 : 40 }}
           transition={{ duration: 0.8 }}
           className={`${align === 'left' ? 'lg:order-1' : 'lg:order-2'} max-w-3xl min-w-0`}
         >
-          <div className="mb-5 flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.28em] text-magenta lg:mb-6">
+          <div className="mb-3 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.24em] text-magenta md:text-[11px] lg:mb-6 lg:gap-4 lg:tracking-[0.28em]">
             <span>{page.eyebrow}</span>
-            <span className="h-px w-14 bg-magenta/80" />
+            <span className="h-px w-12 bg-magenta/80 lg:w-14" />
             <span className="text-white/35">{total}</span>
           </div>
-          <h2 className="max-w-4xl text-[clamp(2.7rem,7.4vw,7.4rem)] font-black uppercase leading-[0.82] tracking-normal text-white lg:text-[clamp(4.1rem,6.15vw,7.05rem)]">
+          <h2 className="max-w-4xl text-[clamp(1.95rem,8.9vw,2.95rem)] font-black uppercase leading-[0.82] tracking-normal text-white md:text-[clamp(2.8rem,7vw,5rem)] lg:text-[clamp(4.1rem,6.15vw,7.05rem)]">
             {page.title}
           </h2>
-          <p className="mt-6 max-w-2xl font-mono text-sm leading-6 text-white/64 md:text-base lg:mt-7 lg:leading-7">
+          <p className="mt-3 max-w-2xl font-mono text-[11px] font-bold leading-5 text-white/64 md:mt-5 md:text-sm md:leading-6 lg:mt-7 lg:text-base lg:leading-7">
             {page.desc}
           </p>
         </motion.div>
@@ -317,7 +317,7 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'cinema') {
     return (
       <PageChrome page={page} total={total}>
-        <div className="relative h-[58vh] max-h-[40rem] min-h-[22rem] overflow-hidden border border-white/15 lg:h-[calc(100vh-15rem)] lg:min-h-0">
+        <div className="relative h-full min-h-0 overflow-hidden border border-white/15 lg:h-[calc(100vh-15rem)]">
           <MediaImage src={main} alt={`${page.id} primary production frame`} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 grid grid-cols-3 gap-2 p-3 md:p-5">
@@ -339,9 +339,9 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'split') {
     return (
       <PageChrome page={page} total={total} align="right">
-        <div className="grid h-[60vh] max-h-[40rem] min-h-[24rem] gap-4 md:grid-cols-[1.18fr_0.82fr] lg:h-[calc(100vh-16rem)] lg:min-h-0">
+        <div className="grid h-full min-h-0 gap-3 md:grid-cols-[1.18fr_0.82fr] md:gap-4 lg:h-[calc(100vh-16rem)]">
           <MediaImage src={main} alt={`${page.id} large production frame`} className="h-full border border-white/15" />
-          <div className="grid min-h-0 gap-4">
+          <div className="hidden min-h-0 gap-3 md:grid md:gap-4">
             <MediaImage src={second} alt={`${page.id} detail frame one`} className="min-h-0 border border-white/15" delay={0.1} />
             <MediaImage src={third} alt={`${page.id} detail frame two`} className="min-h-0 border border-white/15" delay={0.18} />
           </div>
@@ -353,7 +353,7 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'mosaic') {
     return (
       <PageChrome page={page} total={total}>
-        <div className="grid h-[60vh] max-h-[40rem] min-h-[24rem] grid-cols-6 grid-rows-6 gap-3 lg:h-[calc(100vh-16rem)] lg:min-h-0">
+        <div className="grid h-full min-h-0 grid-cols-6 grid-rows-6 gap-2 md:gap-3 lg:h-[calc(100vh-16rem)]">
           <MediaImage src={main} alt={`${page.id} mosaic frame one`} className="col-span-6 row-span-3 border border-white/15 md:col-span-4 md:row-span-4" />
           <MediaImage src={second} alt={`${page.id} mosaic frame two`} className="col-span-3 row-span-2 border border-white/15 md:col-span-2 md:row-span-3" delay={0.08} />
           <MediaImage src={third} alt={`${page.id} mosaic frame three`} className="col-span-3 row-span-2 border border-white/15 md:col-span-2 md:row-span-3" delay={0.16} />
@@ -368,13 +368,13 @@ const UniquePage = ({ page, index, total }) => {
   if (page.variant === 'poster') {
     return (
       <PageChrome page={page} total={total} align="right">
-        <div className="relative h-[61vh] max-h-[41rem] min-h-[24rem] overflow-hidden border border-magenta/45 bg-magenta/10 lg:h-[calc(100vh-15.5rem)] lg:min-h-0">
+        <div className="relative h-full min-h-0 overflow-hidden border border-magenta/45 bg-magenta/10 lg:h-[calc(100vh-15.5rem)]">
           <MediaImage src={main} alt={`${page.id} architectural frame`} className="opacity-85" />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.18),rgba(0,0,0,.75))]" />
           <div className="absolute inset-y-0 right-5 flex items-center">
             <span className="writing-vertical font-mono text-xs uppercase tracking-[0.55em] text-white/60">Permanent installation study</span>
           </div>
-          <div className="absolute bottom-6 left-6 right-20 grid grid-cols-2 gap-3">
+          <div className="absolute bottom-4 left-4 right-12 grid grid-cols-2 gap-2 md:bottom-6 md:left-6 md:right-20 md:gap-3">
             <MediaImage src={second} alt={`${page.id} secondary frame`} className="aspect-[16/9] border border-white/18" delay={0.12} />
             <MediaImage src={third} alt={`${page.id} tertiary frame`} className="aspect-[16/9] border border-white/18" delay={0.2} />
           </div>
